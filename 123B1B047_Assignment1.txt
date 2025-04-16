@@ -1,0 +1,350 @@
+//Kamaaksha Rajendra Kharul
+//123B1B047
+//Assignment 1
+#include<iostream>
+#include<queue>
+using namespace std;
+
+struct Node{
+    Node *left, *right;
+    string key;
+    string val;
+    Node(string key, string val){
+        this -> key = key;
+        this -> val = val;
+        this -> right = NULL;
+        this -> left = NULL;
+    }
+};
+
+class BST{
+    public:
+        Node *root;
+        BST(){
+            root = NULL;
+        }
+        
+        // Insert or create a node
+        void insertNode(string key, string val){
+            Node *nn = new Node(key, val);
+            if (root == NULL){
+                root = nn;
+                cout << "Node added!" << endl;
+                return;
+            }
+            Node *temp = root;
+            while(temp){
+                if(key > temp->key){
+                    if(temp->right == NULL){
+                        temp->right = nn;
+                        cout << "Node added!" << endl;
+                        return;
+                    }
+                    temp = temp->right;
+                }
+                else{
+                    if(temp->left == NULL){
+                        temp->left = nn;
+                        cout << "Node added!" << endl;
+                        return;
+                    }
+                    temp = temp->left;
+                }
+            }
+        }
+        
+        // Height of the tree
+        int height(Node *root){
+            if(root == NULL) return 0;
+            int l = height(root->left);
+            int r = height(root->right);
+            return max(l, r) + 1;
+        }
+        
+        // Clone of the tree
+        Node* clone(Node *temp){
+            if(temp == NULL) return NULL;
+            Node *nn = new Node(temp->key, temp->val);
+            nn->left = clone(temp->left);
+            nn->right = clone(temp->right);
+            return nn;
+        }
+        
+        // Mirror the tree
+        Node* mirror(Node *temp){
+            if(temp == NULL) return NULL;
+            Node *nn = new Node(temp->key, temp->val);
+            nn->left = mirror(temp->right);
+            nn->right = mirror(temp->left);
+            return nn;
+        }
+        
+        // Inorder Traversal (LDR)
+        void inorder(Node *root){
+            if (root == NULL) return;
+            inorder(root->left);
+            cout << root->key << " : " << root->val << endl;
+            inorder(root->right);
+        }
+        
+        // Postorder Traversal (LRD)
+        void postorder(Node *root){
+            if (root == NULL) return;
+            postorder(root->left);
+            postorder(root->right);
+            cout << root->key << " : " << root->val << endl;
+        }
+        
+        // Preorder Traversal (DLR)
+        void preorder(Node *root){
+            if (root == NULL) return;
+            cout << root->key << " : " << root->val << endl;
+            preorder(root->left);
+            preorder(root->right);
+        }
+        
+        // Level Order Traversal
+        void levelOrder(){
+		    if(root == NULL) return;
+		    queue<Node*>q;
+		    q.push(root);
+		    q.push(NULL);
+		    while(!q.empty()){
+		        Node *f = q.front();
+		        q.pop();
+		        if(f == NULL){
+		            cout << endl;
+		            if(!q.empty())
+		                q.push(NULL);
+		        }
+		        else{
+		            cout << f->key << " : " << f->val  << "\t";
+		            if(f -> left) 
+		            	q.push(f -> left);
+		            if(f -> right) 
+		            	q.push(f -> right);
+		        }
+		   }
+	}
+        
+        // Search for a key in the tree
+        void search(string key){
+            if (root == NULL){
+                cout << "Empty tree!" << endl;
+                return;
+            }
+            Node *temp = root;
+            while(temp){
+                if (key == temp -> key){
+                    cout << temp->key << " : " << temp->val << endl;
+                    return;
+                }
+                else if(key < temp -> key){
+                    //go left
+                    temp = temp -> left;
+                }
+                else{
+                    temp = temp -> right;
+                }
+            }
+            cout << "Key NOT FOUND" << endl;
+        }
+        
+        void deleteNode(string key) {
+            if (root == NULL) {
+                cout << "Empty dictionary" << endl;
+                return;
+            }
+            
+            //find the node if present
+            Node *temp = root, *prev = NULL;
+            while (temp != NULL && temp->key != key) {
+                prev = temp;
+                if(key < temp -> key){
+                    temp = temp -> left;
+                }
+                else    
+                    temp = temp -> right;
+            }
+            
+            //if temp is still null this means it isnt present
+            if (temp == NULL) {
+                cout << "Node not found!" << endl;
+                return;
+            }
+            
+            //0 child
+            if (temp->left == NULL && temp->right == NULL) {
+                if (temp == root) 
+                    root = NULL;
+                else if (prev->left == temp) 
+                    prev->left = NULL;
+                else 
+                    prev->right = NULL;
+                delete temp;
+            } 
+
+            //either of the child is null
+            else if (temp->left == NULL || temp->right == NULL) {
+                Node *child;
+                if(temp -> left != NULL){
+                    child = temp -> left;
+                }
+                else    
+                    child = temp -> right;
+                if (temp == root) 
+                    root = child;
+                else if (prev->left == temp) 
+                    prev->left = child;
+                else 
+                    prev->right = child;
+                delete temp;
+            } 
+
+            //have both child
+            else {
+                Node *succParent = temp, *succ = temp->right;
+                while (succ->left != NULL) {
+                    succParent = succ;
+                    succ = succ->left;
+                }
+                //copy the successor che details in temp
+                temp->key = succ->key;
+                temp -> val = succ -> val;
+                if (succParent->left == succ) 
+                    succParent->left = succ->right;
+                else 
+                    succParent->right = succ->right;
+                delete succ;
+            }
+            cout << "Node deleted!" << endl;
+        }
+
+
+        // Update the value of a key
+        void update(string key){
+            if (root == NULL){
+                cout << "Empty tree!" << endl;
+                return;
+            }
+            Node *temp = root;
+            while(temp){
+                if (key == temp->key){
+                    string new_val;
+                    cout << "Enter new value: ";
+                    cin >> new_val;
+                    temp->val = new_val;
+                    cout << "Value updated!" << endl;
+                    return;
+                }
+                else if(key < temp -> key){
+                    temp = temp -> left;
+                }
+                else    
+                    temp = temp -> right;
+            }
+            cout << "Key NOT FOUND" << endl;
+        }
+};
+
+int main(){
+    BST b;
+    int choice;
+    string key, val;
+
+    do{
+        cout << "Dictionary Menu\n";
+        cout << "1. Insert Node\n";
+        cout << "2. Search Key\n";
+        cout << "3. Delete Node\n";
+        cout << "4. Update Value\n";
+        cout << "5. Display Inorder\n";
+        cout << "6. Display Preorder\n";
+        cout << "7. Display Postorder\n";
+        cout << "8. Display Level Order\n";
+        cout << "9. Height of Tree\n";
+        cout << "10. Clone Tree\n";
+        cout << "11. Mirror Tree\n";
+        cout << "0. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+        cin.ignore();
+
+        switch (choice){
+            case 1:{
+                cout << "Enter key: ";
+                getline(cin, key);
+                cout << "Enter value: ";
+                getline(cin, val);
+                b.insertNode(key, val);
+                break;
+            }
+            case 2:{
+                cout << "Enter key to search: ";
+                getline(cin, key);
+                b.search(key);
+                break;
+            }
+            case 3:{
+                cout << "Enter key to delete: ";
+                getline(cin, key);
+                b.deleteNode(key);
+                break;
+            }
+            case 4:{
+                cout << "Enter key to update: ";
+                getline(cin, key);
+                b.update(key);
+                break;
+            }
+            case 5:{
+                cout << "Inorder Traversal:\n";
+                b.inorder(b.root);
+                break;
+            }
+            case 6:{
+                cout << "Preorder Traversal:\n";
+                b.preorder(b.root);
+                break;
+            }
+            case 7:{
+                cout << "Postorder Traversal:\n";
+                b.postorder(b.root);
+                break;
+            }
+            case 8:{
+                cout << "Level Order Traversal:\n";
+                b.levelOrder();
+                break;
+            }
+            case 9:{
+                cout << "Height of Tree: " << b.height(b.root) << endl;
+                break;
+            }
+            case 10:{
+                BST cloneTree;
+                cloneTree.root = b.clone(b.root);
+                cout << "Cloned Tree Inorder Traversal:\n";
+                cloneTree.inorder(cloneTree.root);
+                break;
+            }
+            case 11:{
+                BST mirrorTree;
+                mirrorTree.root = b.mirror(b.root);
+                cout << "Mirrored Tree Inorder Traversal:\n";
+                mirrorTree.inorder(mirrorTree.root);
+                break;
+            }
+            case 0:{
+                cout << "Exiting program...\n";
+                break;
+            }
+            default:
+                cout << "Invalid choice! Try again.\n";
+        }
+    } 
+    while (choice != 0);
+    
+    return 0;
+}
+
